@@ -1,0 +1,948 @@
+
+<html> 
+<head> 
+<script type="text/javascript" src="excanvas.js"></script> 
+<script src = "Geometry.js"></script> 
+ 
+<style type="text/css"> 
+      canvas { border: 1px solid black; }
+</style> 
+<script> 
+ 
+//ctx is the objext that is used to make graphical drawings
+ 
+var ctx;
+var cir = {};
+cir.len = 0;
+cir.disp = {};
+cir.AND = function(x,y,color){draw_AND_GATE(x,y,color);}
+cir.OR = function(x,y,color){draw_OR_GATE(x,y,color);}
+cir.NOT = function(x,y,color){draw_NOT_GATE(x,y,color);}
+cir.CTRL = function(x,y,color){draw_CTRL_GATE(x,y,color);}
+cir.INPUT = function(x,y,color){draw_INPUT_GATE(x,y,color);}
+cir.OUTPUT= function(x,y,color){draw_OUTPUT_GATE(x,y,color);}
+ 
+cir.geo = {};
+cir.geo.AND = {};
+cir.geo.AND.left = {'x':-10,'y':0};
+cir.geo.AND.right = {'x':20,'y':0};
+ 
+cir.geo.OR= {};
+cir.geo.OR.left = {'x':-10,'y':0};
+cir.geo.OR.right = {'x':20,'y':0};
+ 
+ 
+cir.geo.NOT = {};
+cir.geo.NOT.left = {'x':-10,'y':0};
+cir.geo.NOT.right = {'x':20,'y':0};
+ 
+cir.geo.CTRL = {};
+cir.geo.CTRL.left = {'x':0,'y':0};
+cir.geo.CTRL.right = {'x':0,'y':0};
+ 
+cir.geo.INPUT = {};
+cir.geo.INPUT.left = {'x':0,'y':0};
+cir.geo.INPUT.right = {'x':0,'y':0};
+ 
+cir.geo.OUTPUT = {};
+cir.geo.OUTPUT.left = {'x':0,'y':0};
+cir.geo.OUTPUT.right = {'x':0,'y':0};
+ 
+cir.wireClick = 0;
+cir.wire = {};
+cir.wire.len = 0;
+cir.wire.disp = {};
+ 
+cir.oncl = null;
+function draw(){
+        var canvas = document.getElementById('tutorial');
+        //if (canvas.getContext){
+         ctx = canvas.getContext('2d');
+        //}
+ 
+      }
+ 
+</script> 
+</head> 
+ 
+<body onload = "draw()"> 
+<br><br> 
+<canvas id="tutorial" width="800" height="500"></canvas> 
+ 
+ 
+<br> 
+<input type = "radio" name = "1" id = "square"/>Square 
+<input type = "radio" name = "1" id = "circle"/> Circle 
+<input type = "radio" name = "1" id = "arc"/> Arc
+<input type = "radio" name = "1" onclick = "pointer()"  id = "AND"/> AND  
+<input type = "radio" name = "1"  onclick = "pointer()" id = "OR"/> OR 
+<input type = "radio" name = "1"  onclick = "pointer()" id = "NOT"/> NOT 
+<input type = "radio" name = "1" onclick = "pointer()"  id = "CTRL"/> Control Point 
+<input type = "radio" name = "1" onclick = "pointer()" id = "INPUT"/> input 
+<input type = "radio" name = "1" onclick = "pointer()" id = "OUTPUT"/> output 
+<br> 
+<input type = "radio" name = "1" onclick = "wire()" id = "WIRE"/> wire
+<input type = "radio" name = "1" onclick = "pointer()" id = "pointer"/> Pointer
+<input type = "button" onclick = "getVal()" value = "getVal"/> 
+<br><textarea cols= "30" rows= "10" id = "record"></textarea> 
+<br> 
+<input type = "button" onclick = "clearCanvas()" value = "clear"/><br> 
+<input type = "button" onclick = "redraw_cir(cir)" value = "redraw"/> 
+ 
+ 
+<script> 
+ 
+ 
+ 
+ 
+ 
+ 
+function clearCanvas()
+{
+  var x = document.getElementById('tutorial').width;
+  var y = document.getElementById('tutorial').height
+   ctx.clearRect(0,0,x,y);
+}
+ 
+ 
+document.body.onclick = function(e)
+{
+    where_clicked_and_go3(e,toggle)
+}
+ 
+ 
+ 
+function wire()
+{
+   what_element_to_connect(1,1);
+}
+ 
+function pointer()
+{
+     document.getElementById('tutorial').onclick = cir.oncl;
+     document.getElementById('tutorial').mousemove = null;
+}
+ 
+ 
+document.getElementById('tutorial').onclick = function(e){
+                                                           //if ( document.getElementById('circle').checked == true) where_clicked_and_go(e,draw_circle);
+                                                           //if ( document.getElementById('square').checked == true) where_clicked_and_go(e,draw_square);
+                                                           //if ( document.getElementById('arc').checked == true) where_clicked_and_go(e,draw_curve);
+                                                           if ( document.getElementById('square').checked == true) find_out_where_clicked(e);
+ 
+                                                           if ( document.getElementById('AND').checked == true) where_clicked_and_go2(e,draw_IT,"AND");
+                                                           if ( document.getElementById('OR').checked == true) where_clicked_and_go2(e,draw_IT,"OR");
+                                                           if ( document.getElementById('NOT').checked == true) where_clicked_and_go2(e,draw_IT,"NOT");
+                                                           if ( document.getElementById('CTRL').checked == true) where_clicked_and_go2(e,draw_IT,"CTRL");
+                                                           if ( document.getElementById('INPUT').checked == true) where_clicked_and_go(e,draw_INPUT);
+                                                           if ( document.getElementById('OUTPUT').checked == true) where_clicked_and_go(e,draw_OUTPUT);
+                                                           //if ( document.getElementById('WIRE').checked == true) where_clicked_and_go(e,what_element_to_connect);
+ 
+                                                           /*if ( document.getElementById('AND').checked == true) where_clicked_and_go(e,draw_AND);
+                                                           if ( document.getElementById('OR').checked == true) where_clicked_and_go(e,draw_OR);
+                                                           if ( document.getElementById('NOT').checked == true) where_clicked_and_go(e,draw_NOT);
+                                                           if ( document.getElementById('CTRL').checked == true) where_clicked_and_go(e,draw_CTRL);
+                                                           if ( document.getElementById('INPUT').checked == true) where_clicked_and_go(e,draw_INPUT);
+                                                           if ( document.getElementById('OUTPUT').checked == true) where_clicked_and_go(e,draw_OUTPUT);*/
+                                                         }
+ 
+cir.oncl = document.getElementById('tutorial').onclick
+ 
+document.getElementById('tutorial').onmousedown = function(e){
+                                                           if ( document.getElementById('pointer').checked == true) where_clicked_and_go(e,what_element_to_move);
+ 
+                                                         }
+ 
+ 
+ 
+ 
+//speed this up by adding the eventlistener only when needed.
+ 
+function find_out_where_clicked(e)
+{
+e = e ||window.event;
+clickedX = e.clientX + Geometry.getHorizontalScroll();
+clickedY = e.clientY + Geometry.getVerticalScroll();
+make_small_div(clickedX,clickedY)
+}
+ 
+function where_clicked_and_go3(e,go)
+{
+  e = e ||window.event;
+  var target = e.target || e.srcElement
+  clickedX = e.clientX + Geometry.getHorizontalScroll() - target.offsetLeft; //add for canvas element
+  clickedY = e.clientY + Geometry.getVerticalScroll() - target.offsetTop;  //add for canvas element
+  go(clickedX,clickedY,target);
+}
+ 
+function where_clicked_and_go2(e,go,what)
+{
+  e = e ||window.event;
+  var target = e.target || e.srcElement
+  clickedX = e.clientX + Geometry.getHorizontalScroll() - target.offsetLeft; //add for canvas element
+  clickedY = e.clientY + Geometry.getVerticalScroll() - target.offsetTop;  //add for canvas element
+  go(clickedX,clickedY,what);
+}
+ 
+ 
+function where_clicked_and_go(e,go)
+{
+  e = e ||window.event;
+  var target = e.target || e.srcElement
+  clickedX = e.clientX + Geometry.getHorizontalScroll() - target.offsetLeft; //add for canvas element
+  clickedY = e.clientY + Geometry.getVerticalScroll() - target.offsetTop;  //add for canvas element
+  go(clickedX,clickedY);
+}
+ 
+ 
+ 
+function distance(p1,p2)
+{
+   var d = Math.pow(Math.pow(p1.x-p2.x,2) + Math.pow(p1.y-p2.y,2),0.5)
+   return d;
+}
+ 
+ 
+ 
+function toggle(x,y,target)
+{
+   if (target.id.substr(0,6) == "number")
+   {
+      cir.disp[target.id].val = !(cir.disp[target.id].val) + 0;
+      get_each_output();
+      clearCanvas();
+      redraw_cir(cir);
+      
+   }
+ 
+   if (target.id.substr(0,7) == "onumber")
+   {
+      var theid = target.id.substr(1);
+      cir.disp[theid].val = !!getVal(theid) + 0;
+      clearCanvas();
+      redraw_cir(cir);
+   }
+ 
+}
+ 
+ 
+function get_each_output()
+{
+    for (var x in cir.disp)
+    {
+        if (cir.disp[x].type == "OUTPUT")
+        {
+             cir.disp[x].val = !!getVal(x)
+        }   
+    }
+ 
+}
+ 
+ 
+ 
+function getVal(x)
+{
+ 
+   for (var items in cir.disp)
+   {
+                   cir.disp[items].branch = []
+ 
+   }
+ 
+   for (var items in cir.wire.disp)
+   {
+ 
+       cir.disp[cir.wire.disp[items].id2].branch.push(cir.wire.disp[items].id1)
+   }
+ 
+   
+   var r = getVal2(x);
+   //document.getElementById('record').innerHTML += "==" + r + "\n"; 
+   return r;
+ 
+   function getVal2(x)
+   {
+     //document.getElementById('record').innerHTML += "entering getval2 \n";
+     if (cir.disp[x].type == "INPUT")
+      {
+       //   document.getElementById('record').innerHTML += "returning " + cir.disp[x].val + " from an input node \n" ;
+          return  cir.disp[x].val;
+      }
+     if (cir.disp[x].type == "OUTPUT")
+      {
+         // document.getElementById('record').innerHTML += "OUTPUT NODE \n" ;
+          return getVal2(cir.disp[x].branch[0]);
+      }     
+     else
+     {
+         var bool;
+         bool = getVal2(cir.disp[x].branch[0])
+         //document.getElementById('record').innerHTML += "first bool \n";
+ 
+         if (cir.disp[x].branch.length > 1)
+         {
+            for (var i = 1; i < cir.disp[x].branch.length; i++)
+            {
+                if (cir.disp[x].type == "AND")
+                bool = bool && getVal2(cir.disp[x].branch[i]);
+                if (cir.disp[x].type == "OR")
+                bool = bool || getVal2(cir.disp[x].branch[i]);
+                if (cir.disp[x].type == "NOT")
+                bool = !bool;
+           //     document.getElementById('record').innerHTML += "ANding bools after first bool\n"
+            }
+        }
+        else
+        {
+           if (cir.disp[x].type == "NOT") 
+              bool = !bool;
+        }
+       
+        //document.getElementById('record').innerHTML += "returning bool " + bool + "\n" ;
+        return bool;
+ 
+     }
+   }
+ 
+}
+ 
+ 
+ 
+ 
+ 
+ 
+function what_element_to_move(x,y)
+{
+    for (var q in cir.disp)
+    {
+        if (Math.abs(x - cir.disp[q].coor.x) < 30 && Math.abs(y - cir.disp[q].coor.y) <30)
+        {
+           cir.focus = q;
+           cir[cir.disp[cir.focus].type](cir.disp[q].coor.x,cir.disp[q].coor.y,"rgb(255,255,0)")
+           
+ 
+ 
+           /*if (cir.disp[cir.focus].type == "AND" )
+                  draw_AND_GATE(cir.disp[q].coor.x,cir.disp[q].coor.y,"rgb(200,200,0)");
+ 
+           if (cir.disp[cir.focus].type == "OR" )
+                  draw_OR_GATE(cir.disp[q].coor.x,cir.disp[q].coor.y,"rgb(200,200,0)");
+ 
+            if (cir.disp[cir.focus].type == "NOT" )
+                  draw_NOT_GATE(cir.disp[q].coor.x,cir.disp[q].coor.y,"rgb(200,200,0)");*/
+ 
+ 
+ 
+        }
+    }
+ 
+    document.getElementById('tutorial').onmouseup = function(e){
+                                                                     cir.focus = ""
+                                                                     document.getElementById('tutorial').onmousemove = null;
+                                                                     document.getElementById('tutorial').onmouseup = null;
+                                                               }
+    
+    if (cir.focus)
+    {
+         document.getElementById('tutorial').onmousemove = function(e){
+                                                                          where_clicked_and_go(e,move_handler);
+                                                                      }
+    }
+    
+    function move_handler(x,y)
+    {
+        clearCanvas();
+        cir.disp[cir.focus].coor.x = x;
+        cir.disp[cir.focus].coor.y = y;
+        redraw_cir(cir);
+    }
+ 
+}
+ 
+ 
+ 
+ 
+ 
+function what_element_to_connect(x,y)
+{
+   function move_handler(x,y)
+   {
+     document.title = cir.focus+ "  " + x + " " + y;
+    cir.closest = {'q': null, 'by': Number.POSITIVE_INFINITY};
+    for (var q in cir.disp)
+    {  
+        var dist = distance(cir.disp[q].coor,{'x':x,'y':y});
+        if (dist < cir.closest.by)
+        {
+           clearCanvas();
+           redraw_cir(cir);
+           cir.focus = q;
+           cir.closest.q = q;
+           cir.closest.by = dist;
+           cir[cir.disp[cir.focus].type](cir.disp[q].coor.x,cir.disp[q].coor.y,"rgb(255,255,0)")
+ 
+        }
+    }
+   }
+ 
+   function clickFunction()
+   {
+      cir.wireClick ++
+     
+      if (cir.wireClick == 1)
+         cir.firstWire = cir.focus;
+        
+      if (cir.wireClick > 1)
+      {
+        
+         cir.secondWire = cir.focus;
+          cir.wireClick = 0;
+         cir.wire.len++; 
+         
+         cir.wire.disp["number" + cir.wire.len] = {'type':"WIRE",
+                                                    coor1: cir.disp[cir.firstWire],  
+                                                    coor2: cir.disp[cir.secondWire]
+                                                   };
+          cir.wire.disp["number" + cir.wire.len].id1 = cir.firstWire;
+          cir.wire.disp["number" + cir.wire.len].id2 = cir.secondWire;
+ 
+          
+          //document.getElementById('tutorial').onmousemove = null;
+ 
+         draw_WIRE_GATE(cir.disp[cir.firstWire],cir.disp[cir.secondWire]);
+         redraw_cir(cir);
+         //document.getElementById('tutorial').onclick = restore_click;
+        
+      }
+   }
+ 
+           
+         
+        //cir.wireClick = 0;
+         cir.oncl = document.getElementById('tutorial').onclick;
+         document.getElementById('tutorial').onclick = clickFunction;
+ 
+          document.getElementById('tutorial').onmousemove = function(e){ 
+                                                                          
+                                                                          where_clicked_and_go(e,move_handler);
+                                                                      }
+         
+ 
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+function redraw_cir(cir)
+{
+     for (var x in cir.disp)
+     {
+         redraw(cir.disp[x],x);
+     }
+     for (var p in cir.wire.disp)
+     {
+         draw_WIRE_GATE(cir.wire.disp[p].coor1,cir.wire.disp[p].coor2);
+     }
+ 
+}
+ 
+ 
+ 
+ 
+function redraw(elem,x)
+{
+    cir[elem.type](elem.coor.x,elem.coor.y)
+    
+ 
+    if (elem.type == "INPUT")
+    {
+        var xx = document.getElementById('tutorial').offsetLeft;
+        var yy = document.getElementById('tutorial').offsetTop;
+ 
+        document.getElementById(x).style.top = elem.coor.y + yy -30;
+        document.getElementById(x).style.left = elem.coor.x + xx -10;
+        //document.getElementById(x).childNodes[0].value = elem.val
+        document.getElementById(x).innerHTML = elem.val
+    }
+ 
+    if (elem.type == "OUTPUT")
+    {
+        var xx = document.getElementById('tutorial').offsetLeft;
+        var yy = document.getElementById('tutorial').offsetTop;
+ 
+        document.getElementById("o" + x).style.top = elem.coor.y + yy -30;
+        document.getElementById("o" + x).style.left = elem.coor.x + xx -10;
+        document.getElementById("o" + x).innerHTML = elem.val
+    }
+ 
+ 
+/*
+    if (elem.type == "AND")
+    {
+       draw_AND_GATE(elem.coor.x,elem.coor.y)
+    }
+     if (elem.type == "OR")
+    {
+       draw_OR_GATE(elem.coor.x,elem.coor.y)
+    }
+    if (elem.type == "NOT")
+    {
+       draw_NOT_GATE(elem.coor.x,elem.coor.y)
+    }*/
+}
+ 
+ 
+function draw_WIRE_GATE(p1,p2,color)
+{
+   ctx.save();
+    if (color) 
+        ctx.strokeStyle = color;
+    else
+        ctx.strokeStyle = "rgb(0,0,128)";
+    ctx.beginPath();
+    ctx.moveTo(p1.coor.x + cir.geo[p1.type].right.x,p1.coor.y + cir.geo[p1.type].right.y)
+    ctx.lineTo(p2.coor.x + cir.geo[p2.type].left.x,p2.coor.y+ cir.geo[p2.type].left.y);
+    ctx.stroke();
+    ctx.restore();
+}
+ 
+ 
+ 
+function draw_OR_GATE(x,y,color)
+{
+    ctx.save();
+    if (color) 
+        ctx.fillStyle = color;
+    else
+        ctx.fillStyle = "rgb(255,50,50)";
+ 
+    ctx.translate(x,y)
+    ctx.scale(1.25,1.25)
+    ctx.beginPath();
+    ctx.moveTo(-10,10); //bottom left corner
+    ctx.bezierCurveTo(-5,10,-5,-10,-10,-10); //left side
+    ctx.lineTo(3,-10);//top
+    ctx.quadraticCurveTo(10,-10,15,0); //right side
+    ctx.quadraticCurveTo(10,10,0,10); //right side
+    ctx.lineTo(-10,10);//bottom side
+    ctx.fill();
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.stroke();
+    ctx.restore();
+}
+ 
+ 
+function draw_NOT_GATE(x,y,color)
+{
+    ctx.save();
+    if (color) 
+        ctx.fillStyle = color;
+    else
+        ctx.fillStyle = "rgb(128,128,128)";
+ 
+    ctx.translate(x,y)
+    ctx.scale(1.25,1.25)
+    ctx.beginPath();
+    ctx.moveTo(-10,10); //bottom left corner
+    ctx.lineTo(-10,-10); //left side
+    ctx.lineTo(10,0);//top
+    ctx.lineTo(-10,10);//bottom
+    ctx.fill();
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.stroke();
+    ctx.closePath();
+         ctx.beginPath();
+         ctx.arc(15,0,5,0,2*Math.PI, 1);
+         ctx.stroke();
+         ctx.restore(); 
+     
+ 
+/*
+    ctx.translate(x,y)
+    ctx.scale(1.25,1.25)
+    ctx.beginPath();
+    ctx.moveTo(-10,10); //bottom left corner
+    ctx.lineTo(-10,-10); //left side
+    ctx.lineTo(10,0);//top
+    ctx.lineTo(-10,10);//bottom
+    ctx.fill();
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x,y,5,0,2*Math.PI, 1);
+    ctx.fill();
+    ctx.stroke();
+ 
+    ctx.restore();
+*/
+}
+ 
+ 
+ 
+function draw_AND_GATE(x,y,color)
+{
+    ctx.save();
+    if (color) 
+        ctx.fillStyle = color;
+    else
+        ctx.fillStyle = "rgb(128,200,200)";
+ 
+    ctx.translate(x,y)
+    ctx.scale(1.25,1.25)
+    ctx.beginPath();
+    ctx.moveTo(-10,10);
+    ctx.lineTo(-10,-10);
+    ctx.lineTo(3,-10);
+    ctx.bezierCurveTo(20,-10,20,10,3,10);
+    ctx.lineTo(-10,10);
+    ctx.fill();
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.stroke();
+    ctx.restore();
+}
+ 
+ 
+function draw_CTRL_GATE(x,y,color)
+{    
+    ctx.save();
+    if (color) 
+        ctx.fillStyle = color;
+    else
+        ctx.fillStyle = "rgb(0,0,0)";
+ 
+    ctx.translate(x,y)
+    ctx.scale(1.25,1.25)
+    ctx.beginPath();
+         ctx.beginPath();
+         ctx.arc(0,0,5,0,2*Math.PI, 1);
+         ctx.fill();
+         ctx.restore(); 
+}
+ 
+ 
+ 
+function draw_INPUT_GATE(x,y,color,val)
+{    
+    if (!val) val = 0;
+    ctx.save();
+    if (color) 
+        ctx.fillStyle = color;
+    else
+        ctx.fillStyle = "rgb(15,255,0)";
+ 
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.translate(x,y)
+    ctx.scale(1.25,1.25)
+    ctx.beginPath();
+         ctx.beginPath();
+         ctx.arc(0,0,10,0,2*Math.PI, 1);
+         ctx.fill();
+         ctx.stroke();
+         ctx.restore();
+ 
+    
+}
+ 
+ 
+function create_TEXT_GATE(x,y,val,id,w,h)
+{
+   if (!w) w = 10;
+   if (!h) h = 10;
+   if (!(val))
+      val = 0;
+   var p = document.createElement("div");
+   p.setAttribute('id',id);
+   p.setAttribute("style", 'border-color:black;border-style:solid;border-width:1px;position:absolute;' +
+            'z-index:' + 1 + ";" +
+            'left:' + x + 'px;' +
+            'top:' + y + 'px;' +
+            'width:' + w + 'px;' +
+            'height:' + h + 'px;' +
+            '"');
+   var q = document.createTextNode(val);
+   p.appendChild(q);
+   document.body.appendChild(p);
+   
+}
+ 
+ 
+ 
+function draw_OUTPUT_GATE(x,y,color)
+{    
+    ctx.save();
+    if (color) 
+        ctx.fillStyle = color;
+    else
+        ctx.fillStyle = "rgb(255,194,14)";
+ 
+    ctx.strokeStyle = "rgb(0,0,0)";
+    ctx.translate(x,y)
+    ctx.scale(1.25,1.25)
+    ctx.beginPath();
+         ctx.beginPath();
+         ctx.arc(0,0,10,0,2*Math.PI, 1);
+         ctx.fill();
+         ctx.stroke();
+         ctx.restore(); 
+}
+ 
+ 
+function draw_IT(x,y,gate)
+{
+   cir[gate](x,y);
+   cir.disp["number" + cir.len]= {'type': gate, 'coor': {'x': x, 'y': y}};
+   cir.len++;
+}
+ 
+function draw_INPUT(x,y)
+{
+    draw_INPUT_GATE(x,y);
+    cir.disp["number" + cir.len]= {'type': 'INPUT', 'coor': {'x': x, 'y': y}};
+ 
+    cir.disp["number" + cir.len].val = 0;
+ 
+    var xx = x + document.getElementById('tutorial').offsetLeft -10;
+    var yy = y + document.getElementById('tutorial').offsetTop -30;
+    create_TEXT_GATE(xx,yy,0,"number" + cir.len,20,20)
+    
+ 
+    cir.len++;
+}
+ 
+ 
+function draw_OUTPUT(x,y)
+{
+    draw_OUTPUT_GATE(x,y);
+    cir.disp["number" + cir.len]= {'type': 'OUTPUT', 'coor': {'x': x, 'y': y}};
+ 
+    cir.disp["number" + cir.len].val = 0;
+ 
+    var xx = x + document.getElementById('tutorial').offsetLeft -10;
+    var yy = y + document.getElementById('tutorial').offsetTop -30;
+    create_TEXT_GATE(xx,yy,0,"onumber" + cir.len,20,20)
+    
+ 
+    cir.len++;
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+/*
+function draw_AND(x,y)
+{
+    draw_AND_GATE(x,y);
+    cir.disp[cir.len]= {'type': 'AND', 'coor': {'x': x, 'y': y}};
+    cir.len++;
+}
+ 
+function draw_OR(x,y)
+{
+    draw_OR_GATE(x,y);
+    cir.disp[cir.len]= {'type': 'OR', 'coor': {'x': x, 'y': y}};
+    cir.len++;
+}
+ 
+function draw_NOT(x,y)
+{
+    draw_NOT_GATE(x,y);
+    cir.disp[cir.len]= {'type': 'NOT', 'coor': {'x': x, 'y': y}};
+    cir.len++;
+}
+ 
+ 
+function draw_CTRL(x,y)
+{
+    draw_CTRL_GATE(x,y);
+    cir.disp[cir.len]= {'type': 'CTRL', 'coor': {'x': x, 'y': y}};
+    cir.len++;
+}
+ 
+ 
+function draw_INPUT(x,y)
+{
+    draw_INPUT_GATE(x,y);
+    cir.disp[cir.len]= {'type': 'INPUT', 'coor': {'x': x, 'y': y}};
+    cir.len++;
+    
+}
+ 
+function draw_OUTPUT(x,y)
+{
+    draw_OUTPUT_GATE(x,y);
+    cir.disp[cir.len]= {'type': 'OUTPUT', 'coor': {'x': x, 'y': y}};
+    cir.len++;
+}
+*/
+ 
+ 
+ 
+function draw_square(x,y)
+{
+        ctx.fillStyle = "rgba(0,0,200,0.5)";
+        ctx.fillRect (x, y, 30,30);
+}
+ 
+ 
+function draw_circle(x,y)
+{
+        //graph.[graph.len]["coord"] = {'x':x,'y':y};
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(0,200,75,1)";
+        ctx.arc(x,y,graph.rad,0,2*Math.PI, 1);
+        ctx.fill();
+        //graph.len++;
+        document.getElementById('record').innerHTML += "x: " + x + ", y: " + y + "\n"
+}
+ 
+ 
+ 
+function draw_curve(point1,point2)
+{
+ 
+ var ctx = document.getElementById('tutorial').getContext('2d');
+ 
+ctx.fillRect(0,0,150,150);   //  draw a rectangle with default settings
+  ctx.save();                  //  Save the default state
+ 
+  ctx.fillStyle = 'rgb(255,0,0)'       // Make changes to the settings
+  ctx.fillRect(15,15,120,120); // Draw a rectangle with new settings
+ 
+  ctx.save();                  // Save the current state
+  ctx.fillStyle = 'rgb(0,255,0)'       // Make changes to the settings   
+  ctx.fillRect(30,30,90,90);   // Draw a rectangle with new settings
+ 
+  ctx.restore();               // Restore previous state
+  ctx.fillRect(45,45,60,60); // Draw a rectangle with restored settings
+ 
+  ctx.restore();               // Restore original state
+  ctx.fillRect(60,60,30,30); // Draw a rectangle with restored settings
+ 
+ 
+ 
+ctx.beginPath();
+ctx.moveTo(75,25);
+ctx.quadraticCurveTo(25,25,25,62.5);
+ctx.quadraticCurveTo(25,100,50,100);
+ctx.stroke();
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+function make_small_div(x,y)
+{
+/*
+var str = '<div style= "border-color:black;border-style:solid;border-width:1px;position:absolute;' +
+            'left:' + x + 'px;' +
+            'top:' + y + 'px;' +
+            'width:' + '10px;' +
+            'height:' + '10px;' +
+            '"></div>';
+document.body.innerHTML += str;
+*/
+/*innerHTML MESSES IT UP!!! it will cause the onclick event to only fire once!!!!*/
+ 
+ 
+ 
+/*
+var p = document.createElement("div");
+p.setAttribute("style", 'border-color:black;border-style:solid;border-width:1px;position:absolute;' +
+            'left:' + x + 'px;' +
+            'top:' + y + 'px;' +
+            'width:' + '10px;' +
+            'height:' + '10px;' +
+            '"');
+document.body.appendChild(p);
+ 
+ 
+}
+//you cant make a box inside a box this way
+*/
+ 
+ 
+var p = document.createElement("div");
+p.setAttribute("style", 'border-color:black;border-style:solid;border-width:1px;position:absolute;' +
+            'z-index:' + 20 + ";" +
+            'left:' + x + 'px;' +
+            'top:' + y + 'px;' +
+            'width:' + '10px;' +
+            'height:' + '10px;' +
+            '"');
+//document.getElementById('c').appendChild(p);
+document.body.appendChild(p);
+//this is the one that works.
+ 
+ 
+ 
+ 
+}
+ 
+ 
+</script> 
+ 
+ 
+ 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+<br> 
+ 
+ 
+</body> 
+ 
+ 
+</html>
